@@ -5,7 +5,7 @@ arbitrary fitness landscapes.
 If you use this software please cite our associated manuscript ...
 
 ## Compiling
-We provide precompiled versions of the software here ... for linux, macos and
+We provide precompiled versions of the software [here](...) for linux, macos and
 windows.
 
 If you wish to compile it yourself
@@ -24,7 +24,7 @@ If you wish to compile it yourself
 As an example, to generate 10 rough mount fuji landscapes with 5 loci each and
 mu_a = 0.01, sigma_a = 0, sigma_e = 0.05 you would run
 ```
-./stun --generate_only --landscapes 10 RMF -L 5 -m 0.01 -S 0 -s 0.05
+./stun --generate_only --landscapes 100 RMF -L 5 -m 0.01 -S 0 -s 0.05
 ```
 There are three parts to this command. First, `./stun` the executable. Next, the
 general options, in this case `--generate_only` (to specify that the fitness
@@ -49,7 +49,7 @@ will be stored in the folder `data/`.
 
 ## Options
 For help on all options available run `./stun help`. More detailed help on all
-the options and function of the program are provided in the manual of the
+the options and function of the program are provided in the [manual](...) of the
 software. Code documentation can be built and open with the command
 `cargo doc --open`. This is useful to explore the details of the implementation
 or get information to modify or expand the code.
@@ -83,11 +83,11 @@ This options come immediately after the executable name.
 * Custom identifier, appended to the end of the output file names. Option
   `--id <id>`
 
-For detailed help refer to the manual of the software.
+For detailed help refer to the [manual](...) of the software.
 
 ### Fitness landscape models
 This options define the model and come after all other options. For the
-suboptions available for each model run `./stun help <model>` (replace model
+options available for each model run `./stun help <model>` (replace model
 for the target model, e.g., to obtain information on house of cards model run
 `./stun help HoC`). The models available are
 * House of cards model. Option `HoC`
@@ -95,11 +95,11 @@ for the target model, e.g., to obtain information on house of cards model run
 * Rough Mount Fuji model. Option `RMF`
 * NK model. Option `NK`
 * Block model. Option `block`
-* Custom model. Which should be provided by the user, option `custom`
+* Custom model. Provided by the user, option `custom`
 
-Again, the manual contains information on all these models, including a short
+Again, the [manual](...) contains information on all these models, including a short
 description of each, bibliography and usage examples.
 
 ## Contact
 This software was developed at the THEE lab, at University of Bern. You can find
-updated contact information or at our website ...
+updated contact information or at our [website](https://banklab.github.io/people/).
