@@ -1,0 +1,99 @@
+###################################################################################
+### This file contains the output configuration in TOML format
+### (full specification details can be found at https://toml.io/en/)
+###################################################################################
+
+###################################################################################
+# Note on filenames
+# Output filenames can use a set of replacement characters that generate the
+# file names dynamically, e.g.,
+#     "RMF_%L_N%N.dat"
+# will be rendered as
+#     RMF_5_N1000.dat
+# if the number of loci is 5 and the population size 1000.
+# Here is the full list of replacements
+#   - %m:  model's name (e.g., "RMF" for Rough Mount Fuji model)
+#   - %M:  model description (e.g., "RMF_L5_mu0_stda0.1_stdb0.1" for a Rough Mount
+#          Fuji model with 5 loci and corresponding parameters)
+#   - %L:  number of loci
+#   - %N:  population size
+#   - %l:  number of landscapes to use
+#   - %id: user-specified identifier (by --id parameter in the command line)
+#   - %I:  initial population description (e.g., "neutralsfs_dt2_p0.5" for a
+#          population initiated with a neutral SFS with drift threshold 2 and
+#          minor allele probability 0.5)
+#   - %i:  initial population shorter form (only shows the name of initial
+#          population model, e.g., "neutralsfs" for the previously described
+#          situation)
+# The default file name used could be written as "%M.dat" or, if the user specifies
+# an id, as "%M_%id.dat"
+###################################################################################
+
+###################################################################################
+# Saves periodic information about the population
+[details]
+# set to true to save periodic information
+save = true
+
+# uncomment to specify the file name (otherwise an automatic file name is assigned)
+# output_filename = "example_%N.dat"
+
+# save the data every 'period' generations (default: 1)
+period = 1
+
+# list of possible options to save, comment or uncomment options
+options = [
+    "mean_fitness",
+    "variance_fitness",
+    # "median_fitness",
+    # "maximum_fitness",
+    # "minimum_fitness",
+    # "median_fitness_with_genotype",
+    # "maximum_fitness_with_genotype",
+    # "minimum_fitness_with_genotype",
+    # "shannon_entropy",
+    "haplotype_diversity",
+    # "genotypes_count",
+    # "major_genotype",
+    "fixations_count"
+]
+###################################################################################
+
+###################################################################################
+# Saves detailed information about the generation of fixation at each
+# locus and which allele was fixed
+[fixations]
+# set to true to save fixation details
+save = true
+
+# uncomment to specify the file name (otherwise an automatic file name is assigned)
+# output_filename = "example.dat"
+###################################################################################
+
+###################################################################################
+# Saves population
+[population]
+# set to true to save the initial population
+initial = true
+
+# uncomment to specify the file name (otherwise an automatic file name is assigned)
+# output_filename_initial_population = "example.dat"
+
+# save population periodically (set to 0 to ignore)
+# warning: saving large populations too often can slow down the simulation
+#          and/or consume a large disk space
+period = 0
+
+# uncomment to specify the file name (otherwise an automatic file name is assigned)
+# output_filename_periodic_population = "example.dat"
+###################################################################################
+
+###################################################################################
+# Saves final statistics for each run
+[final_statistics]
+# set to true to save final statistics
+save = true
+
+# uncomment to specify the file name (otherwise an automatic file name is assigned)
+# output_filename = "example.dat"
+###################################################################################
