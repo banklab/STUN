@@ -5,11 +5,12 @@ populations
 This software runs simulations of adaptive trajectories of populations over
 arbitrary fitness landscapes.
 
-If you use this software please cite our associated [manuscript](...)
+You are free to use this software for any purposes. If you use this software
+please cite our associated [manuscript](...).
 
 ## Compiling
-We provide precompiled versions of the software for [linux, macos and
-windows](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0).
+We provide precompiled versions of the software for [Linux, macOS and
+Windows](https://bit.ly/stun_manual_binaries).
 
 If you wish to compile it yourself
 1. install rust if it is not installed (https://www.rust-lang.org/tools/install)
@@ -52,8 +53,9 @@ will be stored in the folder `data/`.
 
 ## Options
 For help on all options available run `./stun help`. More detailed help on all
-the options and function of the program are provided in the [manual](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0) of the
-software. Code documentation can be built and open with the command
+the options and function of the program are provided in the
+[manual](https://bit.ly/stun_manual_binaries)
+of the software. Code documentation can be built and open with the command
 `cargo doc --open`. This is useful to explore the details of the implementation
 or get information to modify or expand the code.
 
@@ -86,13 +88,13 @@ This options come immediately after the executable name.
 * Custom identifier, appended to the end of the output file names. Option
   `--id <id>`
 
-For detailed help refer to the [manual](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0)
+For detailed help refer to the [manual](https://bit.ly/stun_manual_binaries)
 of the software.
 
 ### Fitness landscape models
 This options define the model and come after all other options. For the
-options available for each model run `./stun help <model>` (replace model
-for the target model, e.g., to obtain information on house of cards model run
+options available for each model run `./stun help <model>` (replace `<model>`
+with the target model, e.g., to obtain information on house of cards model run
 `./stun help HoC`). The models available are
 * House of cards model. Option `HoC`
 * Additive model. Option `additive`
@@ -101,7 +103,7 @@ for the target model, e.g., to obtain information on house of cards model run
 * Block model. Option `block`
 * Custom model. Provided by the user, option `custom`
 
-Again, the [manual](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0)
+Again, the [manual](https://bit.ly/stun_manual_binaries)
 contains information on all these models, including a short description of each,
 bibliography and usage examples.
 

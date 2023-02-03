@@ -1,0 +1,10 @@
+# made-up fitness landscape
+0 0 0 0.7231
+1 1 1 0.7312
+0 0 1 0.2731
+0 1 1 0.1327
+1 1 1 0.2317
+0 1 0 0.7321
+# next genotype is very important
+1 1 0 0.1723
+1 0 0 0.1732
