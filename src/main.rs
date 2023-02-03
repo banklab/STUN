@@ -1,4 +1,8 @@
-//! STUN (...)
+//! # STUN
+//! Forward-time **S**imulation on **TU**nable fit**N**ess landscapes in recombining populations
+//!
+//! For details on the usage of this program check the associated
+//! [manuscript](...) and the [manual](...)
 
 mod lib;
 
@@ -76,7 +80,7 @@ fn main() -> Result<(), String> {
             let mut population = Population::new(model.get_nloci(), population_size, recombination_map.clone());
             for replicate in 0..nreplicates {
                 population.generate_initial_population(&initial_population);
-                output.save_initial_population(&population, i, &recombination_map_id, replicate);
+                output.save_initial_population(i, &recombination_map_id, replicate, &population);
 
                 output.save_details(i, &recombination_map_id, replicate, 0, &population, &fitness_landscape);
 
@@ -95,7 +99,7 @@ fn main() -> Result<(), String> {
 
                     ///////////////////////////////////////////////////////////////////////////////
                     // save population
-                    output.save_population(&population, i, &recombination_map_id, replicate, t);
+                    output.save_population(i, &recombination_map_id, replicate, t, &population);
                     ///////////////////////////////////////////////////////////////////////////////
 
                     // stop if only one genotype remains
@@ -111,9 +115,8 @@ fn main() -> Result<(), String> {
                 };
                 ///////////////////////////////////////////////////////////////////////////////////
                 // write some more results to data files
-                // write_final_data_to_file(&mut writer, i, replicate, recombination_map, t, final_genotype, &fitness_landscape);
-                output.save_final_data(i, replicate, &recombination_map_id, t, final_genotype, &fitness_landscape);
-                output.save_fixations(i, &recombination_map_id, &population, replicate);
+                output.save_final_data(i, &recombination_map_id, replicate, t, final_genotype, &fitness_landscape);
+                output.save_fixations(i, &recombination_map_id, replicate, &population);
                 ///////////////////////////////////////////////////////////////////////////////////
             } //End of replicate
         } //End of recombination maps

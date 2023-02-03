@@ -237,7 +237,9 @@ impl FitnessLandscape {
         (min, minf)
     }
 
-    /// Saves a binary representation of the fitness landscape that can be loaded later (this is an exact and more compact representation of the fitness landscape than the one provided by save() method)
+    /// Saves a binary representation of the fitness landscape that can be loaded later (this is an
+    /// exact and more compact representation of the fitness landscape than the one provided by
+    /// save() method)
     ///
     /// # Arguments:
     /// * `filename` name of the file in which to save the fitness landscape
@@ -258,7 +260,9 @@ impl FitnessLandscape {
         bincode::deserialize_from(file).unwrap()
     }
 
-    /// Saves a human readable representation of the fitness landscape. It may not be an exact representation of the fitness landscape due to round error in conversion from binary to base 10
+    /// Saves a human readable representation of the fitness landscape. It may not be an exact
+    /// representation of the fitness landscape due to round error in conversion from binary to
+    /// base 10
     ///
     /// # Arguments:
     /// * `filename` name of the file in which to save the fitness landscape

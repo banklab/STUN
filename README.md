@@ -1,12 +1,15 @@
-# STUN (...)
+# STUN
+Forward-time **S**imulation on **TU**nable fit**N**ess landscapes in recombining
+populations
+
 This software runs simulations of adaptive trajectories of populations over
 arbitrary fitness landscapes.
 
-If you use this software please cite our associated manuscript ...
+If you use this software please cite our associated [manuscript](...)
 
 ## Compiling
-We provide precompiled versions of the software [here](...) for linux, macos and
-windows.
+We provide precompiled versions of the software for [linux, macos and
+windows](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0).
 
 If you wish to compile it yourself
 1. install rust if it is not installed (https://www.rust-lang.org/tools/install)
@@ -38,18 +41,18 @@ with 50 replicates, three recombination rates (0.001, 0.01, 0.1), a population
 of 200 individuals, initially uniformly distributed over the genotype space, the
 user would run the following command
 ```
-./stun --landscapes 10 --replicates 50 --recombination_rates 0.001,0.01,0.1 --size 200 --uniform 0.5 NK -N 8 K 3
+./stun --landscapes 10 --replicates 50 --recombination_rates 0.001,0.01,0.1 --size 200 --uniform 0.5 NK -N 8 -K 3
 ```
 or, more compactly,
 ```
-./stun -l 10 -c 50 -r 0.001,0.01,0.1 -N 200 -u 0.5 NK -N 8 K 3
+./stun -l 10 -c 50 -r 0.001,0.01,0.1 -N 200 -u 0.5 NK -N 8 -K 3
 ```
 Notice that recombination rates are separated by commas, not spaces. The results
 will be stored in the folder `data/`.
 
 ## Options
 For help on all options available run `./stun help`. More detailed help on all
-the options and function of the program are provided in the [manual](...) of the
+the options and function of the program are provided in the [manual](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0) of the
 software. Code documentation can be built and open with the command
 `cargo doc --open`. This is useful to explore the details of the implementation
 or get information to modify or expand the code.
@@ -83,7 +86,8 @@ This options come immediately after the executable name.
 * Custom identifier, appended to the end of the output file names. Option
   `--id <id>`
 
-For detailed help refer to the [manual](...) of the software.
+For detailed help refer to the [manual](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0)
+of the software.
 
 ### Fitness landscape models
 This options define the model and come after all other options. For the
@@ -97,9 +101,10 @@ for the target model, e.g., to obtain information on house of cards model run
 * Block model. Option `block`
 * Custom model. Provided by the user, option `custom`
 
-Again, the [manual](...) contains information on all these models, including a short
-description of each, bibliography and usage examples.
+Again, the [manual](https://www.dropbox.com/sh/a6hbk3m823h3v43/AAB5wGVw9RIQh4RenOjvKP8Ja?dl=0)
+contains information on all these models, including a short description of each,
+bibliography and usage examples.
 
 ## Contact
 This software was developed at the THEE lab, at University of Bern. You can find
-updated contact information or at our [website](https://banklab.github.io/people/).
+updated contact information at our [website](https://banklab.github.io/people/).

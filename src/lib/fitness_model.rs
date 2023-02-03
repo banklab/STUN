@@ -40,9 +40,6 @@ pub enum FitnessModel {
         mu: f64,
         sigma: f64
     },
-    // Holey {
-    //
-    // }
     Custom {
         filenames: Vec<String>,
         l: usize
@@ -74,7 +71,8 @@ impl FitnessModel {
         }.to_string()
     }
 
-    /// Gets a short description of the fitness model, containing no whitespace. Useful for inclusion, e.g., in a file name.
+    /// Gets a short description of the fitness model, containing no whitespace. Useful for
+    /// inclusion, e.g., in a file name.
     pub fn short_description(&self) -> String {
         match &self {
             Self::Additive {
@@ -95,16 +93,13 @@ impl FitnessModel {
             Self::Custom {
                 ..
             } => {
-                // // remove any folder paths
-                // let fl = filename.split('/').last().unwrap();
-                // // remove file extension
-                // let fl = fl.rsplit_once('.').unwrap().0;
                 format!("custom")
             },
         }.to_string()
     }
 
-    /// Gets a short description of the fitness model, containing no whitespace. Useful for inclusion, e.g., in a file name.
+    /// Gets a short description of the fitness model, containing no whitespace. Useful for
+    /// inclusion, e.g., in a file name.
     pub fn name(&self) -> String {
         match &self {
             Self::Additive { .. }       => "additive",

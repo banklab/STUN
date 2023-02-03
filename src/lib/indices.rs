@@ -77,6 +77,7 @@ impl Indices {
         self.seqs.row_iter()
     }
 
+    /// Gets the number of genotypes currently present in the population
     pub fn n_genotypes(&self) -> usize {
         self.seqs.rows
     }

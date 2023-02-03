@@ -156,6 +156,10 @@ pub struct Output {
 }
 
 impl Output {
+    /// Checks if a directory exists and creates it in case it does not
+    ///
+    /// # Arguments:
+    /// * `dir` directory to create
     pub fn create_dir(dir: &str) {
         match std::fs::create_dir(dir) {
             Ok(()) => {},
@@ -180,6 +184,12 @@ impl Output {
             .replace("%i",  &InitialPopulation::from_args(&matches).shorter_description())
     }
 
+    /// Creates an Output struct from the command-line arguments
+    ///
+    /// # Arguments:
+    /// * `matches` matches to the command-line arguments
+    /// * `model` fitness model
+    /// * `identifier` identifier string
     pub fn from_args(matches: &ArgMatches, model: &FitnessModel, identifier: &String) -> Output {
         let configuration_filename = matches.get_one::<String>("output_configuration").unwrap();
         let configuration_file = if configuration_filename == "default" {
@@ -441,10 +451,19 @@ impl Output {
         }
     }
 
-    pub fn save_details(&mut self, i: usize, recombination_map_id: &str, c: usize, t: usize, population: &Population, fitness_landscape: &FitnessLandscape) {
+    /// Saves the population details specified by the user in the configuration file
+    ///
+    /// # Arguments:
+    /// * `i` landscape index
+    /// * `recombination` recombination map identifier
+    /// * `replicate` replicate index
+    /// * `t` generation
+    /// * `population`
+    /// * `fitness_landscape`
+    pub fn save_details(&mut self, i: usize, recombination_map_id: &str, replicate: usize, t: usize, population: &Population, fitness_landscape: &FitnessLandscape) {
         if let Some(file) = self.file_details.as_mut() {
             if t % self.period == 0 {
-                let mut data = format!("{}\t{}\t{}\t{}", i, recombination_map_id, c, t);
+                let mut data = format!("{}\t{}\t{}\t{}", i, recombination_map_id, replicate, t);
                 for output in self.data.iter() {
                     data += output.to_string(population, fitness_landscape).as_str()
                 }
@@ -454,7 +473,14 @@ impl Output {
         }
     }
 
-    pub fn save_fixations(&mut self, i: usize, recombination_map_id: &str, population: &Population, replicate: usize) {
+    /// Saves the fixation details specified by the user in the configuration file
+    ///
+    /// # Arguments:
+    /// * `i` landscape index
+    /// * `recombination` recombination map identifier
+    /// * `replicate` replicate index
+    /// * `population`
+    pub fn save_fixations(&mut self, i: usize, recombination_map_id: &str, replicate: usize, population: &Population) {
         if let Some(file) = self.file_fixations.as_mut() {
             let mut fixations_line = format!("{}\t{}\t{}", i, recombination_map_id, replicate);
             for j in 0..population.get_l() {
@@ -471,13 +497,28 @@ impl Output {
         }
     }
 
-    pub fn save_initial_population(&mut self, population: &Population, i: usize, recombination_map_id: &str, replicate: usize) {
+    /// Saves the initial population as specified by the user in the configuration file
+    ///
+    /// # Arguments:
+    /// * `i` landscape index
+    /// * `recombination` recombination map identifier
+    /// * `replicate` replicate index
+    /// * `population`
+    pub fn save_initial_population(&mut self, i: usize, recombination_map_id: &str, replicate: usize, population: &Population) {
         if let Some(file) = self.file_initial_population.as_mut() {
             population.save(file, i, recombination_map_id, replicate, 0).unwrap();
         }
     }
 
-    pub fn save_population(&mut self, population: &Population, i: usize, recombination_map_id: &str, replicate: usize, t: usize) {
+    /// Saves the population as specified by the user in the configuration file
+    ///
+    /// # Arguments:
+    /// * `i` landscape index
+    /// * `recombination` recombination map identifier
+    /// * `replicate` replicate index
+    /// * `t` generation
+    /// * `population`
+    pub fn save_population(&mut self, i: usize, recombination_map_id: &str, replicate: usize, t: usize, population: &Population) {
         if let Some(file) = self.file_population.as_mut() {
             if t % self.population_period == 0 {
                 population.save(file, i, recombination_map_id, replicate, t).unwrap();
@@ -485,7 +526,15 @@ impl Output {
         }
     }
 
-    pub fn save_final_data(&mut self, i: usize, replicate: usize, recombination_map_id: &str, t: usize, final_genotype: usize, fitness_landscape: &FitnessLandscape) {
+    /// Saves the final data as specified by the user in the configuration file
+    ///
+    /// # Arguments:
+    /// * `i` landscape index
+    /// * `recombination` recombination map identifier
+    /// * `replicate` replicate index
+    /// * `final_genotype` final genotype index
+    /// * `fitness_landscape`
+    pub fn save_final_data(&mut self, i: usize, recombination_map_id: &str, replicate: usize, t: usize, final_genotype: usize, fitness_landscape: &FitnessLandscape) {
         if let Some(file) = self.file_final.as_mut() {
             let max_sequence = fitness_landscape.get_indices().to_sequence(final_genotype);
             let (max, maxf) = fitness_landscape.maximum();
