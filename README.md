@@ -6,7 +6,8 @@ This software runs simulations of adaptive trajectories of populations over
 arbitrary fitness landscapes.
 
 You are free to use this software for any purposes. If you use this software
-please cite our associated [manuscript](...).
+please cite our associated
+[manuscript (André Amado, Juan Li, Claudia Bank, ..., 2023)](...).
 
 ## Compiling
 We provide precompiled versions of the software for [Linux, macOS and
