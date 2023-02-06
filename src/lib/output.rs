@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! Output module
 
 use crate::lib::{

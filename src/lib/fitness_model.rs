@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! Fitness model module
 
 #![allow(dead_code)]

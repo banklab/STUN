@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! Library module containing all modules required by the program
 
 pub mod matrix;

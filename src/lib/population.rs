@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! Population module
 
 #![allow(dead_code)]

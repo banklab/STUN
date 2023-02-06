@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! Fitness landscape module
 
 #![allow(dead_code)]

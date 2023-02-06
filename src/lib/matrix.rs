@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! Matrix module
 
 #![allow(dead_code)]

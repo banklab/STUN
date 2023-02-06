@@ -1,3 +1,5 @@
+// author: André Amado
+
 #![allow(dead_code)]
 
 use serde::{Deserialize, Serialize};

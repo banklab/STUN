@@ -1,3 +1,5 @@
+// author: André Amado
+
 //! # STUN
 //! Forward-time **S**imulation on **TU**nable fit**N**ess landscapes in recombining populations
 //!
