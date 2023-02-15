@@ -434,7 +434,7 @@ impl Output {
             Self::create_dir("data/data");
 
             let mut file = open_file(final_statistics_filename);
-            write_to_file(&mut file, "#landscape_id\trecombination_rate\treplicate\ttfixation\tfound_maximum\tgenetic_load\tfinal_fitness\n");
+            write_to_file(&mut file, "#landscape_id\trecombination_rate\treplicate\ttfixation\tfound_maximum\tadaptive_load\tfinal_fitness\n");
 
             Some(file)
         } else {
@@ -544,11 +544,11 @@ impl Output {
             let found_maximum = if final_genotype == max { 1 } else { 0 };
             let final_fitness = fitness_landscape.fitness(max_sequence);
 
-            let genetic_load = (maxf - final_fitness) / maxf;
+            let adaptive_load = (maxf - final_fitness) / maxf;
 
             let data_line = format!(
                 "{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-                i, recombination_map_id, replicate, t, found_maximum, genetic_load, final_fitness
+                i, recombination_map_id, replicate, t, found_maximum, adaptive_load, final_fitness
             );
             write_to_file(file, &data_line);
         }

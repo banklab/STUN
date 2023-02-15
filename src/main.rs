@@ -211,7 +211,7 @@ fn get_command_line_matches() -> ArgMatches {
                 .display_order(6),
             Arg::with_name("output_configuration")
                 .short('o')
-                .long("output")
+                .long("output_conf")
                 .help("Configuration file specifying the output details. If not present a default output will be assumed.")
                 .default_value("default")
                 .value_parser(value_parser!(String))
