@@ -7,7 +7,7 @@ arbitrary fitness landscapes.
 
 You are free to use this software for any purposes. If you use this software
 please cite our associated
-[manuscript (André Amado, Juan Li, Claudia Bank, ..., 2023)](...).
+[manuscript (André Amado, Juan Li, Claudia Bank, bioRxiv, 2023)](https://doi.org/10.1101/2023.02.15.528681).
 
 ## Compiling
 We provide precompiled versions of the software for [Linux, macOS and
