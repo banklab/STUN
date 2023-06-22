@@ -11,7 +11,8 @@ use crate::lib::fitness_landscape::FitnessLandscape;
 use rand::{
     prelude::*,
     distributions::WeightedIndex,
-    seq::SliceRandom
+    seq::{SliceRandom},
+    self
 };
 use rand_distr::{Distribution, Binomial, Uniform};
 
@@ -365,19 +366,17 @@ impl Population {
             self.pop[genotype] += 1;
         }
 
-        // Filter out the extinct genotypes
-        self.occupied_genotypes = self
-            .occupied_genotypes
-            .iter()
-            .filter(|&&i| self.pop[i] > 0)
-            .map(|&i| i)
-            .collect();
+        self.filter_extinct_genotypes();
     }
 
-    pub fn single_mutation(&mut self, mutation_probability_per_site: f64) {
+    /// Executes a mutation update where each genotype can mutate at most once
+    ///
+    /// # Arguments:
+    /// * `mutation_probability_per_locus`
+    pub fn single_mutation(&mut self, mutation_probability_per_locus: f64) {
         let mut rng = thread_rng();
 
-        let mutation_probability = mutation_probability_per_site * self.l as f64;
+        let mutation_probability = mutation_probability_per_locus * self.l as f64;
         if mutation_probability > 1. {
             panic!("mutation probability per individual > 1 (p = {})!", mutation_probability)
         }
@@ -407,6 +406,74 @@ impl Population {
             }
             self.pop[index] += 1;
         }
+
+        self.filter_extinct_genotypes();
+    }
+
+    /// Executes a mutation update where each genotype can mutate several times
+    ///
+    /// # Arguments:
+    /// * `mutation_probability_per_locus`
+    pub fn multiple_mutation(&mut self, mutation_probability_per_locus: f64) {
+        let mut rng = thread_rng();
+
+        if mutation_probability_per_locus > 1. {
+            panic!("mutation probability per locus > 1 (p = {})!", mutation_probability_per_locus)
+        }
+
+        let mut mutated_individuals: Vec<usize> = Vec::new();
+        for &genotype_index in self.occupied_genotypes.iter() {
+            let n_individuals = self.pop[genotype_index];
+            let n_loci = (n_individuals * self.l) as u64;
+
+            // determine the number of mutations
+            let n_mutations = Binomial::new(n_loci, mutation_probability_per_locus).unwrap().sample(&mut rng);
+            if n_mutations > 0 {
+                let original_sequence: Vec<bool> = self.indices.to_sequence(genotype_index).iter().map(|&i| i).collect();
+
+                // determine the positions of the mutations
+                let mutation_positions = rand::seq::index::sample(&mut rng, n_loci as usize, n_mutations as usize);
+                
+                // group the mutations by individual and assign the mutated loci
+                let mutation_positions: Vec<(usize, usize)> = mutation_positions.iter().map(|i| (i / self.l, i % self.l)).collect();
+                
+                // construct the new individuals
+                let mut previous = mutation_positions[0].0;
+                let mut new_individuals: Vec<Vec<usize>> = vec![vec![]];
+
+                for &(individual, locus) in mutation_positions.iter() {
+                    if individual != previous {
+                        new_individuals.push(vec![]);
+                        previous = individual;
+                    }
+                    new_individuals.last_mut().unwrap().push(locus);
+                }
+
+                // remove the mutated individuals from the population
+                self.pop[genotype_index] -= new_individuals.len();
+
+                // compute the indices of the new individuals
+                for individual in new_individuals {
+                    let mut sequence = original_sequence.clone();
+                    for locus in individual {
+                        sequence[locus] = !sequence[locus];
+                    }
+                    
+                    let index = self.indices.to_index(sequence.as_slice());
+                    mutated_individuals.push(index);
+                }
+            }
+        }
+
+        // add the new individuals to the population
+        for &individual in &mutated_individuals {
+            if !self.occupied_genotypes.contains(&individual) {
+                self.occupied_genotypes.push(individual);
+            }
+            self.pop[individual] += 1;
+        }
+
+        self.filter_extinct_genotypes();
     }
 
     /// Generates an initial population to replace the current population
@@ -525,6 +592,17 @@ impl Population {
         // Check the alleles that may be fixed by chance in the initial population
         self.fixation = vec![Allele::NotFixed; self.l];
         self.check_fixation(0);
+    }
+
+    /// Filters out extinct genotypes from the occupied_genotypes
+    fn filter_extinct_genotypes(&mut self) {
+        // Filter out the extinct genotypes
+        self.occupied_genotypes = self
+            .occupied_genotypes
+            .iter()
+            .filter(|&&i| self.pop[i] > 0)
+            .map(|&i| i)
+            .collect();
     }
 
     /// Saves current population to a file
