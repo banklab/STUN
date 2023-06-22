@@ -4,7 +4,7 @@
 //! Forward-time **S**imulation on **TU**nable fit**N**ess landscapes in recombining populations
 //!
 //! For details on the usage of this program check the associated
-//! [manuscript](...) and the
+//! [manuscript](https://www.biorxiv.org/content/10.1101/2023.02.15.528681v1) and the
 //! [manual](https://bit.ly/stun_manual_binaries)
 
 mod lib;
