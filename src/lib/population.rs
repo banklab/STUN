@@ -13,7 +13,7 @@ use rand::{
     distributions::WeightedIndex,
     seq::SliceRandom
 };
-use rand_distr::Distribution;
+use rand_distr::{Distribution, Binomial, Uniform};
 
 use regex::Regex;
 
@@ -372,6 +372,41 @@ impl Population {
             .filter(|&&i| self.pop[i] > 0)
             .map(|&i| i)
             .collect();
+    }
+
+    pub fn single_mutation(&mut self, mutation_probability_per_site: f64) {
+        let mut rng = thread_rng();
+
+        let mutation_probability = mutation_probability_per_site * self.l as f64;
+        if mutation_probability > 1. {
+            panic!("mutation probability per individual > 1 (p = {})!", mutation_probability)
+        }
+
+        let mut mutated_individuals: Vec<usize> = Vec::new();
+        for &genotype_index in self.occupied_genotypes.iter() {
+            let n_individuals = self.pop[genotype_index];
+
+            let mutations_distribution = Binomial::new(n_individuals as u64, mutation_probability).unwrap();
+            let n_mutations = mutations_distribution.sample(&mut rng) as usize;
+
+            mutated_individuals.reserve(n_mutations);
+            for _ in 0..n_mutations { mutated_individuals.push(genotype_index); }
+            self.pop[genotype_index] -= n_mutations;
+        };
+
+        let locus_distribution: Uniform<usize> = Uniform::new(0, self.l);
+        for &individual in mutated_individuals.iter() {
+            let locus = locus_distribution.sample(&mut rng);
+
+            let mut sequence: Vec<bool> = self.indices.to_sequence(individual).iter().map(|&i| i).collect();
+            sequence[locus] = !sequence[locus];
+
+            let index = self.indices.to_index(sequence.as_slice());
+            if !self.occupied_genotypes.contains(&index) {
+                self.occupied_genotypes.push(index);
+            }
+            self.pop[index] += 1;
+        }
     }
 
     /// Generates an initial population to replace the current population
