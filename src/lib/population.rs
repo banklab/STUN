@@ -415,65 +415,63 @@ impl Population {
     /// # Arguments:
     /// * `mutation_probability_per_locus`
     pub fn multiple_mutation(&mut self, mutation_probability_per_locus: f64) {
-        let mut rng = thread_rng();
+        if mutation_probability_per_locus > 0. {
+            let mut rng = thread_rng();
 
-        if mutation_probability_per_locus > 1. {
-            panic!("mutation probability per locus > 1 (p = {})!", mutation_probability_per_locus)
-        }
+            let mut mutated_individuals: Vec<usize> = Vec::new();
+            for &genotype_index in self.occupied_genotypes.iter() {
+                let n_individuals = self.pop[genotype_index];
+                let n_loci = (n_individuals * self.l) as u64;
 
-        let mut mutated_individuals: Vec<usize> = Vec::new();
-        for &genotype_index in self.occupied_genotypes.iter() {
-            let n_individuals = self.pop[genotype_index];
-            let n_loci = (n_individuals * self.l) as u64;
+                // determine the number of mutations
+                let n_mutations = Binomial::new(n_loci, mutation_probability_per_locus).unwrap().sample(&mut rng);
+                if n_mutations > 0 {
+                    let original_sequence: Vec<bool> = self.indices.to_sequence(genotype_index).iter().map(|&i| i).collect();
 
-            // determine the number of mutations
-            let n_mutations = Binomial::new(n_loci, mutation_probability_per_locus).unwrap().sample(&mut rng);
-            if n_mutations > 0 {
-                let original_sequence: Vec<bool> = self.indices.to_sequence(genotype_index).iter().map(|&i| i).collect();
-
-                // determine the positions of the mutations
-                let mutation_positions = rand::seq::index::sample(&mut rng, n_loci as usize, n_mutations as usize);
-                
-                // group the mutations by individual and assign the mutated loci
-                let mutation_positions: Vec<(usize, usize)> = mutation_positions.iter().map(|i| (i / self.l, i % self.l)).collect();
-                
-                // construct the new individuals
-                let mut previous = mutation_positions[0].0;
-                let mut new_individuals: Vec<Vec<usize>> = vec![vec![]];
-
-                for &(individual, locus) in mutation_positions.iter() {
-                    if individual != previous {
-                        new_individuals.push(vec![]);
-                        previous = individual;
-                    }
-                    new_individuals.last_mut().unwrap().push(locus);
-                }
-
-                // remove the mutated individuals from the population
-                self.pop[genotype_index] -= new_individuals.len();
-
-                // compute the indices of the new individuals
-                for individual in new_individuals {
-                    let mut sequence = original_sequence.clone();
-                    for locus in individual {
-                        sequence[locus] = !sequence[locus];
-                    }
+                    // determine the positions of the mutations
+                    let mutation_positions = rand::seq::index::sample(&mut rng, n_loci as usize, n_mutations as usize);
                     
-                    let index = self.indices.to_index(sequence.as_slice());
-                    mutated_individuals.push(index);
+                    // group the mutations by individual and assign the mutated loci
+                    let mutation_positions: Vec<(usize, usize)> = mutation_positions.iter().map(|i| (i / self.l, i % self.l)).collect();
+                    
+                    // construct the new individuals
+                    let mut previous = mutation_positions[0].0;
+                    let mut new_individuals: Vec<Vec<usize>> = vec![vec![]];
+
+                    for &(individual, locus) in mutation_positions.iter() {
+                        if individual != previous {
+                            new_individuals.push(vec![]);
+                            previous = individual;
+                        }
+                        new_individuals.last_mut().unwrap().push(locus);
+                    }
+
+                    // remove the mutated individuals from the population
+                    self.pop[genotype_index] -= new_individuals.len();
+
+                    // compute the indices of the new individuals
+                    for individual in new_individuals {
+                        let mut sequence = original_sequence.clone();
+                        for locus in individual {
+                            sequence[locus] = !sequence[locus];
+                        }
+                        
+                        let index = self.indices.to_index(sequence.as_slice());
+                        mutated_individuals.push(index);
+                    }
                 }
             }
-        }
 
-        // add the new individuals to the population
-        for &individual in &mutated_individuals {
-            if !self.occupied_genotypes.contains(&individual) {
-                self.occupied_genotypes.push(individual);
+            // add the new individuals to the population
+            for &individual in &mutated_individuals {
+                if !self.occupied_genotypes.contains(&individual) {
+                    self.occupied_genotypes.push(individual);
+                }
+                self.pop[individual] += 1;
             }
-            self.pop[individual] += 1;
-        }
 
-        self.filter_extinct_genotypes();
+            self.filter_extinct_genotypes();
+        }
     }
 
     /// Generates an initial population to replace the current population
@@ -611,13 +609,14 @@ impl Population {
     /// * `file` where to save the population
     /// * `i` landscape index
     /// * `recombination_map_id` recombination map identifier
+    /// * `mutation_probability` mutation probability per locus
     /// * `c` replicate index
     /// * `t` current generation
-    pub fn save(&self, file: &mut BufferedFile, i: usize, recombination_map_id: &str, c: usize, t: usize) -> std::io::Result<()> {
+    pub fn save(&self, file: &mut BufferedFile, i: usize, recombination_map_id: &str, mutation_probability: f64, c: usize, t: usize) -> std::io::Result<()> {
         if t == 0 {
-            write!(file, "{}\t{}\t{}", i, recombination_map_id, c)?;
+            write!(file, "{}\t{}\t{}\t{}", i, recombination_map_id, mutation_probability, c)?;
         } else {
-            write!(file, "{}\t{}\t{}\t{}", i, recombination_map_id, c, t)?;
+            write!(file, "{}\t{}\t{}\t{}\t{}", i, recombination_map_id, mutation_probability, c, t)?;
         }
         for &g in self.occupied_genotypes.iter() {
             write!(file, "\t")?;
@@ -646,36 +645,31 @@ impl Population {
     /// * `t` current generation
     /// * `i` index of allele to check
     pub fn check_fixation_allele(&mut self, t: usize, i: usize) {
+        // check if the allele is fixed
+        let mut fixed = true;
         let initial_allele = self.indices.get(self.occupied_genotypes[0], i);
+        for j in 1..self.occupied_genotypes.len() {
+            if self.indices.get(self.occupied_genotypes[j], i) != initial_allele {
+                fixed = false;
+                break;
+            }
+        }
 
-        let mut update = true;
+        // update the record accordingly
         match self.fixation[i] {
-            Allele::NotFixed => {
-                // If marked as not fixed the allele needs to be checked
-                for j in 1..self.occupied_genotypes.len() {
-                    if self.indices.get(self.occupied_genotypes[j], i) != initial_allele {
-                        // If a different version is found then the allele is not fixed and does
-                        // not need to be updates
-                        update = false;
-                        break;
-                    }
-                } // If no element has a different version of the allele, then it needs to be
-                  // marked as fixed
-            }
-            _ => {
-                // Otherwise (if already marked as fixed) the allele does not need to be checked or
-                // updated
-                update = false;
-            }
+            Allele::NotFixed =>
+                if fixed {
+                    self.fixation[i] = Allele::Fixed {
+                        time: t,
+                        allele: initial_allele,
+                    };
+                },
+            Allele::Fixed { time: _, allele: _ } =>
+                if !fixed {
+                    self.fixation[i] = Allele::NotFixed;
+                }
         }
 
-        // fixation time is registered as well as the fixed version of the allele
-        if update {
-            self.fixation[i] = Allele::Fixed {
-                time: t,
-                allele: initial_allele,
-            };
-        }
     }
 
     /// Gets the fixation status of the ith allele

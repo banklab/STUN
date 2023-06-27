@@ -58,6 +58,11 @@ fn main() -> Result<(), String> {
     let population_size: usize = *matches.get_one("population_size").unwrap();
 
     let recombination_map_list = Recombination::from_args(&matches, model.get_nloci())?;
+
+    let mutation_probability_per_locus = *matches.get_one("mutation_probability").unwrap_or(&0.);
+    if mutation_probability_per_locus > 1. {
+        panic!("Error: mutation probability per locus > 1 (p = {})!", mutation_probability_per_locus)
+    }
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,7 +82,7 @@ fn main() -> Result<(), String> {
 
         // run the populations for all the recombination rates listed by the user
         for recombination_map in recombination_map_list.iter() {
-            let recombination_map_id = recombination_map.summary();
+            let recombination_map_id: String = recombination_map.summary();
 
             // repeat for nreplicates runs
             let mut population = Population::new(model.get_nloci(), population_size, recombination_map.clone());
@@ -92,6 +97,7 @@ fn main() -> Result<(), String> {
                     ///////////////////////////////////////////////////////////////////////////////
                     // update the population to the new generation
                     // Biology is here!
+                    population.multiple_mutation(mutation_probability_per_locus);
                     population.recombination();
                     population.wright_fisher(&fitness_landscape);
                     ///////////////////////////////////////////////////////////////////////////////
@@ -216,6 +222,11 @@ fn get_command_line_matches() -> ArgMatches {
                 .default_value("default")
                 .value_parser(value_parser!(String))
                 .display_order(9),
+            Arg::with_name("mutation_probability")
+                .short('m')
+                .long("mutation_probability")
+                .help("Mutation probability per locus per generation.")
+                .value_parser(value_parser!(f64)),
         ])
         .group(ArgGroup::with_name("initial_population")
             .args(&["neutralsfs", "uniform", "generate_only"])

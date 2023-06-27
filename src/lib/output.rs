@@ -39,6 +39,7 @@ fn write_to_file(file: &mut BufferedFile, contents: &str) {
 }
 
 /// Enum that lists the different output types available
+#[derive(PartialEq, Clone, Copy)]
 pub enum OutputType {
     FitnessMean,
     FitnessVariance,
@@ -150,6 +151,7 @@ pub struct Output {
     data:   Vec<OutputType>,
     period: usize,
     population_period: usize,
+    mutation_probability: f64,
     file_details:             Option<BufferedFile>,
     file_fixations:           Option<BufferedFile>,
     file_initial_population:  Option<BufferedFile>,
@@ -204,16 +206,16 @@ impl Output {
             Some(file.parse::<Value>().unwrap())
         };
 
+        let mutation_probability = *matches.get_one("mutation_probability").unwrap_or(&0.);
+
         let mut period: usize = 1;
         Self::create_dir("data");
         let data = match &configuration_file {
             // If no configuration file is present return the default options
-            None => {
-                vec![
+            None => vec![
                         OutputType::FitnessMean,        OutputType::FitnessVariance,
                         OutputType::HaplotypeDiversity, OutputType::FixationsCount,
-                ]
-            },
+                    ],
             Some(config) => {
                 let mut data = vec![];
 
@@ -239,7 +241,7 @@ impl Output {
                         // Tries to read the options
                         if let Some(options) = details.get("options") {
                             for line in options.as_array().unwrap_or(&vec![]) {
-                                data.push(match &line.as_str().unwrap().to_lowercase()[..] {
+                                let info = match &line.as_str().unwrap().to_lowercase()[..] {
                                     "mean_fitness"                   => OutputType::FitnessMean,
                                     "variance_fitness"               => OutputType::FitnessVariance,
                                     "median_fitness"                 => OutputType::FitnessMedian,
@@ -254,7 +256,8 @@ impl Output {
                                     "major_genotype"                 => OutputType::MajorGenotype,
                                     "fixations_count"                => OutputType::FixationsCount,
                                     _ => panic!("Error: unrecognized output: {}", line)
-                                });
+                                };
+                                data.push(info);
                             };
                         };
                     };
@@ -288,7 +291,7 @@ impl Output {
             let mut file = open_file(filename);
 
             // save the labels
-            let mut label = String::from("#landscape_id\trecombination_rate\treplicate\tt");
+            let mut label = String::from("#landscape_id\trecombination_rate\tmutation_probability\treplicate\tt");
             for output in data.iter() {
                 label += "\t";
                 label += &output.label();
@@ -325,11 +328,15 @@ impl Output {
             }
         };
 
-        let file_fixations = if save_fixations {
+        if mutation_probability > 0. && save_fixations {
+            println!("Warning: fixed alleles can become polymorphic again since mutation rate is greater than 0. Fixation times saved refer to the last fixation an allele undergoes.");
+        }
+
+        let file_fixations: Option<std::io::BufWriter<fs::File>> = if save_fixations {
             Self::create_dir("data/fixations");
 
             let mut file = open_file(fixations_filename);
-            write_to_file(&mut file, "#landscape_id\trecombination_rate\treplicate\tfixation_time allele\n");
+            write_to_file(&mut file, "#landscape_id\trecombination_rate\tmutation_probability\treplicate\tfixation_time allele\n");
 
             Some(file)
         } else {
@@ -364,8 +371,8 @@ impl Output {
             Self::create_dir("data/initial_population");
 
             let mut file = open_file(initial_population_filename);
-            write_to_file(&mut file, "#landscape_id\trecombination_rate\treplicate\tgenotype\tcount\t...\n");
-
+            write_to_file(&mut file, "#landscape_id\trecombination_rate\tmutation_probability\treplicate\tgenotype\tcount\t...\n");
+            
             Some(file)
         } else {
             None
@@ -400,14 +407,13 @@ impl Output {
             Self::create_dir("data/periodic_population");
 
             let mut file = open_file(population_filename);
-            write_to_file(&mut file, "#landscape_id\trecombination_rate\treplicate\tgeneration\tgenotype\tcount\t...\n");
-
+            write_to_file(&mut file, "#landscape_id\trecombination_rate\tmutation_probability\treplicate\tgeneration\tgenotype\tcount\t...\n");
             Some(file)
         } else {
             None
         };
 
-        let mut save_final_statistics = true;
+        let mut save_final_statistics: bool = true;
         let mut final_statistics_filename = if identifier.is_empty(){
             format!("data/data/{}.dat", model.short_description())
         } else {
@@ -434,8 +440,7 @@ impl Output {
             Self::create_dir("data/data");
 
             let mut file = open_file(final_statistics_filename);
-            write_to_file(&mut file, "#landscape_id\trecombination_rate\treplicate\ttfixation\tfound_maximum\tadaptive_load\tfinal_fitness\n");
-
+            write_to_file(&mut file, "#landscape_id\trecombination_rate\tmutation_probability\treplicate\ttfinal\tfound_maximum\tadaptive_load\tfinal_fitness\n");
             Some(file)
         } else {
             None
@@ -444,6 +449,7 @@ impl Output {
         Self {
             data,
             period,
+            mutation_probability,
             file_details,
             file_fixations,
             file_initial_population,
@@ -465,7 +471,7 @@ impl Output {
     pub fn save_details(&mut self, i: usize, recombination_map_id: &str, replicate: usize, t: usize, population: &Population, fitness_landscape: &FitnessLandscape) {
         if let Some(file) = self.file_details.as_mut() {
             if t % self.period == 0 {
-                let mut data = format!("{}\t{}\t{}\t{}", i, recombination_map_id, replicate, t);
+                let mut data = format!("{}\t{}\t{}\t{}\t{}", i, recombination_map_id, self.mutation_probability, replicate, t);
                 for output in self.data.iter() {
                     data += output.to_string(population, fitness_landscape).as_str()
                 }
@@ -484,7 +490,7 @@ impl Output {
     /// * `population`
     pub fn save_fixations(&mut self, i: usize, recombination_map_id: &str, replicate: usize, population: &Population) {
         if let Some(file) = self.file_fixations.as_mut() {
-            let mut fixations_line = format!("{}\t{}\t{}", i, recombination_map_id, replicate);
+            let mut fixations_line = format!("{}\t{}\t{}\t{}", i, recombination_map_id, self.mutation_probability, replicate);
             for j in 0..population.get_l() {
                 let allele_info = match population.get_fixation(j) {
                     Allele::NotFixed => "-1 -1".to_string(),
@@ -508,7 +514,7 @@ impl Output {
     /// * `population`
     pub fn save_initial_population(&mut self, i: usize, recombination_map_id: &str, replicate: usize, population: &Population) {
         if let Some(file) = self.file_initial_population.as_mut() {
-            population.save(file, i, recombination_map_id, replicate, 0).unwrap();
+            population.save(file, i, recombination_map_id, self.mutation_probability, replicate, 0).unwrap();
         }
     }
 
@@ -523,7 +529,7 @@ impl Output {
     pub fn save_population(&mut self, i: usize, recombination_map_id: &str, replicate: usize, t: usize, population: &Population) {
         if let Some(file) = self.file_population.as_mut() {
             if t % self.population_period == 0 {
-                population.save(file, i, recombination_map_id, replicate, t).unwrap();
+                population.save(file, i, recombination_map_id, self.mutation_probability, replicate, t).unwrap();
             }
         }
     }
@@ -546,10 +552,11 @@ impl Output {
 
             let adaptive_load = (maxf - final_fitness) / maxf;
 
-            let data_line = format!(
-                "{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-                i, recombination_map_id, replicate, t, found_maximum, adaptive_load, final_fitness
-            );
+            let data_line =
+                format!(
+                    "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+                    i, recombination_map_id, self.mutation_probability, replicate, t, found_maximum, adaptive_load, final_fitness
+                );
             write_to_file(file, &data_line);
         }
     }
