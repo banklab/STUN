@@ -166,6 +166,9 @@ pub enum InitialPopulation {
     /// Initial population generated with a uniform population, where the probaility of a derived
     /// allele is given by the field value
     Uniform(f64),
+    /// Monomorphic with a specified genotype
+    Monomorphic(Vec<bool>),
+    RandomMonomorphic
 }
 
 impl InitialPopulation {
@@ -184,6 +187,19 @@ impl InitialPopulation {
             } else {
                 Self::NeutralSFS
             }
+        } else if matches.contains_id("monomorphic") {
+            let default = String::from("random");
+            let arg = matches.get_one::<String>("monomorphic").unwrap_or(&default);
+
+            if arg == "random" {
+                Self::RandomMonomorphic
+            } else {
+                // Check if all characters are 0's and 1's
+                if !arg.chars().all(|c| c == '0' || c == '1') {
+                    panic!("Error: monomorphic option not recognized ({})", arg)
+                }
+                Self::Monomorphic(arg.chars().map(|g| g == '1').collect())
+            }
         } else if matches.contains_id("uniform") {
             let p = *matches.get_one("uniform").unwrap();
             Self::Uniform(p)
@@ -197,6 +213,15 @@ impl InitialPopulation {
             Self::NeutralSFS => String::from("neutralsfs"),
             Self::NeutralSFSDriftThreshold(d, p) => format!("neutralsfs_dt{}_p{}", d, p),
             Self::Uniform(p) => format!("uniform({})", p),
+            Self::Monomorphic(genotype) => {
+                let sequence: String = 
+                    genotype
+                    .iter()
+                    .map(|&g| if g {'1'} else {'0'})
+                    .collect();
+                format!("monomorphic({})", sequence)
+            },
+            Self::RandomMonomorphic => String::from("random_monomorphic"),
         }
     }
     pub fn shorter_description(&self) -> String {
@@ -204,6 +229,8 @@ impl InitialPopulation {
             Self::NeutralSFS => String::from("neutralsfs"),
             Self::NeutralSFSDriftThreshold(_, _) => String::from("neutralsfs"),
             Self::Uniform(_) => String::from("uniform"),
+            Self::Monomorphic(_) => String::from("monomorphic"),
+            Self::RandomMonomorphic => String::from("monomorphic"),
         }
     }
 }
@@ -582,6 +609,22 @@ impl Population {
                     }
                 }
             },
+            InitialPopulation::Monomorphic(g) => {
+                // Transform the sequence to the corresponding index
+                let idx = self.indices.to_index(&g);
+
+                // Add the individuals to the population
+                self.occupied_genotypes.push(idx);
+                self.pop[idx] = self.size;
+            },
+            InitialPopulation::RandomMonomorphic => {
+                // Pick a random genotype by choosing a random index
+                let idx = rng.gen_range(0..self.pop.len());
+
+                // Add the individuals to the population
+                self.occupied_genotypes.push(idx);
+                self.pop[idx] = self.size;
+            }
         }
         // Remove repeated genotypes
         self.occupied_genotypes.sort_unstable();

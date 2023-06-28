@@ -60,8 +60,19 @@ fn main() -> Result<(), String> {
     let recombination_map_list = Recombination::from_args(&matches, model.get_nloci())?;
 
     let mutation_probability_per_locus = *matches.get_one("mutation_probability").unwrap_or(&0.);
+
     if mutation_probability_per_locus > 1. {
         panic!("Error: mutation probability per locus > 1 (p = {})!", mutation_probability_per_locus)
+    }
+
+    if !(mutation_probability_per_locus > 0.) {
+        println!("{}", initial_population.short_description());
+
+        match initial_population {
+            InitialPopulation::Monomorphic(_) => panic!("Error: monomorphic initial populations require a mutation probability to be set."),
+            InitialPopulation::RandomMonomorphic => panic!("Error: monomorphic initial populations require a mutation probability to be set."),
+            _ => { println!("didn't match...")}
+        }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -183,7 +194,7 @@ fn get_command_line_matches() -> ArgMatches {
                 .max_values(2)
                 .value_parser(value_parser!(f64))
                 .help("Distributes the initial population according to a neutral site frequency spectrum distribution (can be followed by an optional drift threshold value and a second number for the probability that the minor allele is encoded by 1)")
-                .conflicts_with_all(&["uniform", "generate_only"])
+                .conflicts_with_all(&["uniform", "generate_only", "monomorphic"])
                 .display_order(5),
             Arg::with_name("uniform")
                 .long("uniform")
@@ -192,12 +203,19 @@ fn get_command_line_matches() -> ArgMatches {
                 .value_name("p")
                 .default_value("0.5")
                 .value_parser(value_parser!(f64))
-                .conflicts_with_all(&["neutralsfs", "generate_only"])
+                .conflicts_with_all(&["neutralsfs", "generate_only", "monomorphic"])
+                .display_order(5),
+            Arg::with_name("monomorphic")
+                .long("monomorphic")
+                .help("Chooses a monomorphic initial population (this option requires a mutation probability). It is followed by the option \"random\" (to initilize the population at a random genotype each replicate) or a sequence of 0's and 1's representing the initial genotype")
+                .value_name("sequence")
+                .value_parser(value_parser!(String))
+                .conflicts_with_all(&["neutralsfs", "generate_only", "uniform"])
                 .display_order(5),
             Arg::with_name("generate_only")
                 .long("generate_only")
                 .help("Only generates landscapes (does not simulate the adaptive process)")
-                .conflicts_with_all(&["uniform", "neutralsfs"])
+                .conflicts_with_all(&["uniform", "neutralsfs", "monomorphic"])
                 .action(clap::ArgAction::SetTrue)
                 .display_order(5),
             Arg::with_name("recombination_rates")
@@ -226,10 +244,11 @@ fn get_command_line_matches() -> ArgMatches {
                 .short('m')
                 .long("mutation_probability")
                 .help("Mutation probability per locus per generation.")
+                .value_name("mutation_probability")
                 .value_parser(value_parser!(f64)),
         ])
         .group(ArgGroup::with_name("initial_population")
-            .args(&["neutralsfs", "uniform", "generate_only"])
+            .args(&["neutralsfs", "uniform", "monomorphic", "generate_only"])
             .required(true)
             .multiple(false)
         )
