@@ -22,6 +22,7 @@ use crate::lib::{
     fitness_landscape::FitnessLandscape,
     population::{Population, Recombination},
     output::Output,
+    generation_counter::GenerationCounter
 };
 
 
@@ -61,17 +62,26 @@ fn main() -> Result<(), String> {
 
     let mutation_probability_per_locus = *matches.get_one("mutation_probability").unwrap_or(&0.);
 
+    let mut generation = if let Some(&max_generation) = matches.get_one("max_generation") {
+        GenerationCounter::new(Some(max_generation))
+    } else {
+        GenerationCounter::new(None)
+    };
+
+    // These following conditions check if the user input is consitent 
     if mutation_probability_per_locus > 1. {
         panic!("Error: mutation probability per locus > 1 (p = {})!", mutation_probability_per_locus)
     }
 
     if !(mutation_probability_per_locus > 0.) {
-        println!("{}", initial_population.short_description());
-
         match initial_population {
             InitialPopulation::Monomorphic(_) => panic!("Error: monomorphic initial populations require a mutation probability to be set."),
             InitialPopulation::RandomMonomorphic => panic!("Error: monomorphic initial populations require a mutation probability to be set."),
             _ => { println!("didn't match...")}
+        }
+    } else {
+        if !generation.is_maximum_generation() {
+            panic!("Error: mutation requires a maximum generation to be set.")
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -103,7 +113,6 @@ fn main() -> Result<(), String> {
 
                 output.save_details(i, &recombination_map_id, replicate, 0, &population, &fitness_landscape);
 
-                let mut t = 0;
                 let final_genotype = loop {
                     ///////////////////////////////////////////////////////////////////////////////
                     // update the population to the new generation
@@ -114,29 +123,30 @@ fn main() -> Result<(), String> {
                     ///////////////////////////////////////////////////////////////////////////////
 
                     // check for genotype fixations in the population
-                    population.check_fixation(t);
-                    t += 1;
+                    population.check_fixation(generation.current());
+                    generation.advance();
 
                     ///////////////////////////////////////////////////////////////////////////////
                     // save population
-                    output.save_population(i, &recombination_map_id, replicate, t, &population);
+                    output.save_population(i, &recombination_map_id, replicate, generation.current(), &population);
                     ///////////////////////////////////////////////////////////////////////////////
 
-                    // stop if only one genotype remains
-                    let active_genotypes = population.active_genotypes();
-                    if active_genotypes.len() == 1 {
-                        break active_genotypes[0];
+                    // stop if the conditions are met
+                    if generation.finished(&population, mutation_probability_per_locus > 0.) {
+                        break population.active_genotypes()[0];
                     }
 
                     ///////////////////////////////////////////////////////////////////////////////
                     // write results to a file
-                    output.save_details(i, &recombination_map_id, replicate, t, &population, &fitness_landscape);
+                    output.save_details(i, &recombination_map_id, replicate, generation.current(), &population, &fitness_landscape);
                     ///////////////////////////////////////////////////////////////////////////////
                 };
                 ///////////////////////////////////////////////////////////////////////////////////
                 // write some more results to data files
-                output.save_final_data(i, &recombination_map_id, replicate, t, final_genotype, &fitness_landscape);
+                output.save_final_data(i, &recombination_map_id, replicate, generation.current(), final_genotype, &fitness_landscape);
                 output.save_fixations(i, &recombination_map_id, replicate, &population);
+
+                generation.reset();
                 ///////////////////////////////////////////////////////////////////////////////////
             } //End of replicate
         } //End of recombination maps
@@ -246,6 +256,12 @@ fn get_command_line_matches() -> ArgMatches {
                 .help("Mutation probability per locus per generation.")
                 .value_name("mutation_probability")
                 .value_parser(value_parser!(f64)),
+            Arg::with_name("max_generation")
+                .short('t')
+                .long("max_generation")
+                .help("Maximum generation.")
+                .value_name("max_generation")
+                .value_parser(value_parser!(usize)),
         ])
         .group(ArgGroup::with_name("initial_population")
             .args(&["neutralsfs", "uniform", "monomorphic", "generate_only"])

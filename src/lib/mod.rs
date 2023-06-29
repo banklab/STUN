@@ -8,3 +8,4 @@ pub mod fitness_landscape;
 pub mod fitness_model;
 pub mod population;
 pub mod output;
+pub mod generation_counter;

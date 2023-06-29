@@ -13,7 +13,7 @@ please cite our associated
 We provide precompiled versions of the software for [Linux, macOS and
 Windows](https://bit.ly/stun_manual_binaries).
 
-If you wish to compile it yourself
+To compile it yourself
 1. install rust if it is not installed (https://www.rust-lang.org/tools/install)
    Note: It is possible that you'll have to restart the shell after installing
    rust
