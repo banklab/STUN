@@ -20,7 +20,7 @@ use regex::Regex;
 
 use std::{
     io::{BufReader, BufRead, Write},
-    fs::File
+    fs::File, convert::TryInto
 };
 type BufferedFile = std::io::BufWriter<std::fs::File>;
 
@@ -446,44 +446,30 @@ impl Population {
             let mut rng = thread_rng();
 
             let mut mutated_individuals: Vec<usize> = Vec::new();
+
+            let n_mutations_individual = Binomial::new(self.l as u64, mutation_probability_per_locus).unwrap();
             for &genotype_index in self.occupied_genotypes.iter() {
                 let n_individuals = self.pop[genotype_index];
-                let n_loci = (n_individuals * self.l) as u64;
+                let original_sequence: Vec<bool> = self.indices.to_sequence(genotype_index).iter().map(|&i| i).collect();
 
-                // determine the number of mutations
-                let n_mutations = Binomial::new(n_loci, mutation_probability_per_locus).unwrap().sample(&mut rng);
-                if n_mutations > 0 {
-                    let original_sequence: Vec<bool> = self.indices.to_sequence(genotype_index).iter().map(|&i| i).collect();
+                for _ in 0..n_individuals {
+                    let n_mutations = n_mutations_individual.sample(&mut rng) as usize;
 
-                    // determine the positions of the mutations
-                    let mutation_positions = rand::seq::index::sample(&mut rng, n_loci as usize, n_mutations as usize);
-                    
-                    // group the mutations by individual and assign the mutated loci
-                    let mutation_positions: Vec<(usize, usize)> = mutation_positions.iter().map(|i| (i / self.l, i % self.l)).collect();
-                    
-                    // construct the new individuals
-                    let mut previous = mutation_positions[0].0;
-                    let mut new_individuals: Vec<Vec<usize>> = vec![vec![]];
+                    if n_mutations > 0 {
+                        // remove the mutated individual from the population
+                        self.pop[genotype_index] -= 1;
 
-                    for &(individual, locus) in mutation_positions.iter() {
-                        if individual != previous {
-                            new_individuals.push(vec![]);
-                            previous = individual;
-                        }
-                        new_individuals.last_mut().unwrap().push(locus);
-                    }
-
-                    // remove the mutated individuals from the population
-                    self.pop[genotype_index] -= new_individuals.len();
-
-                    // compute the indices of the new individuals
-                    for individual in new_individuals {
+                        // determine the positions of the mutations
+                        let mutation_positions = rand::seq::index::sample(&mut rng, self.l, n_mutations);
                         let mut sequence = original_sequence.clone();
-                        for locus in individual {
+                        for locus in mutation_positions.iter() {
                             sequence[locus] = !sequence[locus];
                         }
-                        
+
+                        // compute the index of the new individual
                         let index = self.indices.to_index(sequence.as_slice());
+
+                        // add the new individual to the list
                         mutated_individuals.push(index);
                     }
                 }
