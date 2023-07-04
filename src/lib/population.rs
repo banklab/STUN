@@ -20,7 +20,7 @@ use regex::Regex;
 
 use std::{
     io::{BufReader, BufRead, Write},
-    fs::File, convert::TryInto
+    fs::File
 };
 type BufferedFile = std::io::BufWriter<std::fs::File>;
 
@@ -617,8 +617,14 @@ impl Population {
         self.occupied_genotypes.dedup();
 
         // Check the alleles that may be fixed by chance in the initial population
-        self.fixation = vec![Allele::NotFixed; self.l];
-        self.check_fixation(0);
+        self.fixation = (0..self.l).map(|i| {
+            let allele = self.is_fixed(i);
+            if let Some(allele) = allele {
+                Allele::Fixed { time: 0, allele }
+            } else {
+                Allele::NotFixed
+            }
+        }).collect();
     }
 
     /// Filters out extinct genotypes from the occupied_genotypes
@@ -668,6 +674,21 @@ impl Population {
         }
     }
 
+    /// Checks if ith allele is fixed
+    ///
+    /// # Arguments:
+    /// * `t` current generation
+    #[inline]
+    fn is_fixed(&self, i: usize) -> Option<bool> {
+        let initial_allele = self.indices.get(self.occupied_genotypes[0], i);
+        for j in 1..self.occupied_genotypes.len() {
+            if self.indices.get(self.occupied_genotypes[j], i) != initial_allele {
+                return None
+            }
+        }
+        Some(initial_allele)
+    }
+
     /// Checks if there was a fixation at the ith allele
     ///
     /// # Arguments:
@@ -675,26 +696,19 @@ impl Population {
     /// * `i` index of allele to check
     pub fn check_fixation_allele(&mut self, t: usize, i: usize) {
         // check if the allele is fixed
-        let mut fixed = true;
-        let initial_allele = self.indices.get(self.occupied_genotypes[0], i);
-        for j in 1..self.occupied_genotypes.len() {
-            if self.indices.get(self.occupied_genotypes[j], i) != initial_allele {
-                fixed = false;
-                break;
-            }
-        }
+        let allele = self.is_fixed(i);
 
         // update the record accordingly
         match self.fixation[i] {
             Allele::NotFixed =>
-                if fixed {
+                if let Some(allele) = allele {
                     self.fixation[i] = Allele::Fixed {
                         time: t,
-                        allele: initial_allele,
+                        allele,
                     };
                 },
             Allele::Fixed { time: _, allele: _ } =>
-                if !fixed {
+                if allele == None {
                     self.fixation[i] = Allele::NotFixed;
                 }
         }
