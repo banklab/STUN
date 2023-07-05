@@ -123,7 +123,8 @@ fn main() -> Result<(), String> {
                     ///////////////////////////////////////////////////////////////////////////////
 
                     // check for genotype fixations in the population
-                    population.check_fixation(generation.current());
+                    let fixations = population.check_fixation(generation.current());
+                    output.save_fixation_details(i, &recombination_map_id, replicate, generation.current(), fixations);
                     generation.advance();
 
                     ///////////////////////////////////////////////////////////////////////////////

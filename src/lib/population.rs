@@ -664,14 +664,19 @@ impl Population {
         Ok(())
     }
 
-    /// Checks if there was any fixation
+    /// Checks if there was any fixation and returns a list of fixed loci and 
+    /// corresponding alleles
     ///
     /// # Arguments:
     /// * `t` current generation
-    pub fn check_fixation(&mut self, t: usize) {
+    pub fn check_fixation(&mut self, t: usize) -> Vec<(usize, bool)> {
+        let mut fixations = Vec::with_capacity(self.l);
         for i in 0..self.l {
-            self.check_fixation_allele(t, i);
+            if let Some(fixation) = self.check_fixation_allele(t, i) {
+                fixations.push(fixation)
+            }
         }
+        fixations
     }
 
     /// Checks if ith allele is fixed
@@ -694,7 +699,7 @@ impl Population {
     /// # Arguments:
     /// * `t` current generation
     /// * `i` index of allele to check
-    pub fn check_fixation_allele(&mut self, t: usize, i: usize) {
+    pub fn check_fixation_allele(&mut self, t: usize, i: usize) -> Option<(usize, bool)> {
         // check if the allele is fixed
         let allele = self.is_fixed(i);
 
@@ -706,13 +711,14 @@ impl Population {
                         time: t,
                         allele,
                     };
+                    return Some((i, allele));
                 },
             Allele::Fixed { time: _, allele: _ } =>
                 if allele == None {
                     self.fixation[i] = Allele::NotFixed;
                 }
         }
-
+        None
     }
 
     /// Gets the fixation status of the ith allele

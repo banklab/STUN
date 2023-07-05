@@ -154,6 +154,7 @@ pub struct Output {
     mutation_probability: f64,
     file_details:             Option<BufferedFile>,
     file_fixations:           Option<BufferedFile>,
+    file_fixation_details:    Option<BufferedFile>,
     file_initial_population:  Option<BufferedFile>,
     file_population:          Option<BufferedFile>,
     file_final:               Option<BufferedFile>
@@ -329,7 +330,7 @@ impl Output {
         };
 
         if mutation_probability > 0. && save_fixations {
-            println!("Warning: fixed alleles can become polymorphic again since mutation rate is greater than 0. Fixation times saved refer to the last fixation an allele undergoes.");
+            println!("Warning: fixed alleles can become polymorphic again since mutation rate is greater than 0. Fixation times saved in the 'fixation/' file refer to the last fixation an allele undergoes. In case fixation information is needed we recommend using the option [fixation_details] in the outuput configuration file instead of the option [fixations].");
         }
 
         let file_fixations: Option<std::io::BufWriter<fs::File>> = if save_fixations {
@@ -337,6 +338,41 @@ impl Output {
 
             let mut file = open_file(fixations_filename);
             write_to_file(&mut file, "#landscape_id\trecombination_rate\tmutation_probability\treplicate\tfixation_time allele\n");
+
+            Some(file)
+        } else {
+            None
+        };
+
+
+        let mut save_fixation_details = true;
+        let mut fixation_details_filename = if identifier.is_empty() {
+            format!("data/fixation_details/{}.dat", model.short_description())
+        } else {
+            format!("data/fixation_details/{}_{}.dat", model.short_description(), identifier)
+        };
+
+        if let Some(conf) = &configuration_file {
+            if let Some(fixations) = conf.get("fixation_details") {
+                save_fixation_details = if let Some(save) = fixations.get("save") {
+                    save.as_bool().unwrap_or(false)
+                } else {
+                    false
+                };
+
+                if let Some(name) = fixations.get("output_filename") {
+                    fixation_details_filename =
+                        String::from("data/fixation_details/")
+                        + &Self::generate_filename(name.as_str().unwrap(), matches, model, identifier);
+                }
+            }
+        };
+
+        let file_fixation_details: Option<std::io::BufWriter<fs::File>> = if save_fixation_details {
+            Self::create_dir("data/fixation_details");
+
+            let mut file = open_file(fixation_details_filename);
+            write_to_file(&mut file, "#landscape_id\trecombination_rate\tmutation_probability\treplicate\tfixation_time\tlocus\tallele\n");
 
             Some(file)
         } else {
@@ -452,6 +488,7 @@ impl Output {
             mutation_probability,
             file_details,
             file_fixations,
+            file_fixation_details,
             file_initial_population,
             population_period,
             file_population,
@@ -460,6 +497,7 @@ impl Output {
     }
 
     /// Saves the population details specified by the user in the configuration file
+    /// (option [details])
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -481,7 +519,8 @@ impl Output {
         }
     }
 
-    /// Saves the fixation details specified by the user in the configuration file
+    /// Saves the fixation data specified by the user in the configuration file
+    /// (option [fixations])
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -505,7 +544,26 @@ impl Output {
         }
     }
 
+    /// Saves the fixation details specified by the user in the configuration file
+    /// (option [fixation_details])
+    ///
+    /// # Arguments:
+    /// * `i` landscape index
+    /// * `recombination` recombination map identifier
+    /// * `replicate` replicate index
+    /// * `t` current generation
+    /// * `fixations` vector containing the fixations in the current generation
+    pub fn save_fixation_details(&mut self, i: usize, recombination_map_id: &str, replicate: usize, t: usize, fixations: Vec<(usize, bool)>) {
+        if let Some(file) = self.file_fixation_details.as_mut() {
+            for (locus, allele) in fixations {
+                let fixations_line = format!("{}\t{}\t{}\t{}\t{}\t{}\t{}\n", i, recombination_map_id, self.mutation_probability, replicate, t, locus, if allele { 1 } else { 0 });
+                write_to_file(file, &fixations_line);
+            }
+        }
+    }
+
     /// Saves the initial population as specified by the user in the configuration file
+    /// (option [population] -> initial)
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -519,6 +577,7 @@ impl Output {
     }
 
     /// Saves the population as specified by the user in the configuration file
+    /// (option [population] -> period)
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -535,6 +594,7 @@ impl Output {
     }
 
     /// Saves the final data as specified by the user in the configuration file
+    /// (option [final_statistics])
     ///
     /// # Arguments:
     /// * `i` landscape index
