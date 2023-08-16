@@ -60,17 +60,6 @@ options = [
 ###################################################################################
 
 ###################################################################################
-# Saves information about the generation of fixation at each locus and which
-# allele was fixed (saved at the end of each run)
-[fixations]
-# set to true to save fixation details
-save = true
-
-# uncomment to specify the file name (otherwise an automatic file name is assigned)
-# output_filename = "example.dat"
-###################################################################################
-
-###################################################################################
 # Saves information about each fixation in the population (saved whenever a 
 # fixation occurs)
 [fixation_details]

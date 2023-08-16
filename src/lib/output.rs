@@ -306,7 +306,7 @@ impl Output {
         };
 
 
-        let mut save_fixations = true;
+        let mut save_fixations = false;
         let mut fixations_filename = if identifier.is_empty() {
             format!("data/fixations/{}.dat", model.short_description())
         } else {
@@ -329,8 +329,8 @@ impl Output {
             }
         };
 
-        if mutation_probability > 0. && save_fixations {
-            println!("Warning: fixed alleles can become polymorphic again since mutation rate is greater than 0. Fixation times saved in the 'fixation/' file refer to the last fixation an allele undergoes. In case fixation information is needed we recommend using the option [fixation_details] in the outuput configuration file instead of the option [fixations].");
+        if save_fixations {
+            println!("Warning: [fixations] option is deprecated and does not work correctly when paired with a nonzero mutation rate. Please use the [fixation_details] option instead.")
         }
 
         let file_fixations: Option<std::io::BufWriter<fs::File>> = if save_fixations {
