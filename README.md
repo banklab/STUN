@@ -55,7 +55,7 @@ will be stored in the folder `data/`.
 ## Options
 For help on all options available run `./stun help`. More detailed help on all
 the options and function of the program are provided in the
-[manual](https://bit.ly/stun_manual_binaries)
+[manual](manual/STUN_manual.pdf)
 of the software. Code documentation can be built and open with the command
 `cargo doc --open`. This is useful to explore the details of the implementation
 or get information to modify or expand the code.
@@ -89,7 +89,7 @@ This options come immediately after the executable name.
 * Custom identifier, appended to the end of the output file names. Option
   `--id <id>`
 
-For detailed help refer to the [manual](https://bit.ly/stun_manual_binaries)
+For detailed help refer to the [manual](manual/STUN_manual.pdf)
 of the software.
 
 ### Fitness landscape models
@@ -104,7 +104,7 @@ with the target model, e.g., to obtain information on house of cards model run
 * Block model. Option `block`
 * Custom model. Provided by the user, option `custom`
 
-Again, the [manual](https://bit.ly/stun_manual_binaries)
+Again, the [manual](manual/STUN_manual.pdf)
 contains information on all these models, including a short description of each,
 bibliography and usage examples.
 

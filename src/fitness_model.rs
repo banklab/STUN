@@ -2,8 +2,6 @@
 
 //! Fitness model module
 
-#![allow(dead_code)]
-
 use serde::{Deserialize, Serialize};
 use clap::{Command, Arg, ArgMatches, ArgGroup, value_parser, ValueHint};
 use std::{
@@ -17,21 +15,21 @@ use glob::glob;
 #[derive(Serialize, Deserialize, Clone)]
 pub enum FitnessModel {
     /// Additive fitness landscape model. For details, check 
-    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
+    /// [STUN's manual](https://github.com/banklab/STUN/manual/STUN_manual.pdf).
     Additive {
         mu: f64,
         sigma: f64,
         l: usize
     },
     /// House of Cards fitness landscape model. For details, check 
-    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
+    /// [STUN's manual](https://github.com/banklab/STUN/manual/STUN_manual.pdf).
     HouseOfCards {
         mu: f64,
         sigma: f64,
         l: usize
     },
     /// Rough Mount Fuji fitness landscape model. For details, check 
-    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
+    /// [STUN's manual](https://github.com/banklab/STUN/manual/STUN_manual.pdf).
     RoughMountFuji {
         mu_a: f64,
         sigma_a: f64,
@@ -39,13 +37,13 @@ pub enum FitnessModel {
         l: usize
     },
     /// NK fitness landscape model. For details, check 
-    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
+    /// [STUN's manual](https://github.com/banklab/STUN/manual/STUN_manual.pdf).
     NK {
         n: usize,
         k: usize,
     },
     /// Block fitness landscape model. For details, check 
-    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
+    /// [STUN's manual](https://github.com/banklab/STUN/manual/STUN_manual.pdf).
     Block {
         n: usize,
         b: usize,
@@ -53,7 +51,7 @@ pub enum FitnessModel {
         sigma: f64
     },
     /// Custom fitness landscape model. For details, check 
-    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
+    /// [STUN's manual](https://github.com/banklab/STUN/manual/STUN_manual.pdf).
     Custom {
         filenames: Vec<String>,
         l: usize
