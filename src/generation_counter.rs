@@ -2,7 +2,7 @@
 
 //! Generation counter module
 
-use crate::lib::population::Population;
+use crate::population::Population;
 
 /// Struct that keeps track of generation and end conditions
 pub struct GenerationCounter {

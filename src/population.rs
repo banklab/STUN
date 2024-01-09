@@ -4,14 +4,16 @@
 
 #![allow(dead_code)]
 
-use crate::lib::matrix::Matrix;
-use crate::lib::indices::Indices;
-use crate::lib::fitness_landscape::FitnessLandscape;
+use crate::{
+    matrix::Matrix,
+    indices::Indices,
+    fitness_landscape::FitnessLandscape
+};
 
 use rand::{
     prelude::*,
     distributions::WeightedIndex,
-    seq::{SliceRandom},
+    seq::SliceRandom,
     self
 };
 use rand_distr::{Distribution, Binomial, Uniform};

@@ -2,7 +2,7 @@
 
 //! Output module
 
-use crate::lib::{
+use crate::{
     fitness_model::FitnessModel,
     fitness_landscape::FitnessLandscape,
     population::{Population, Allele, InitialPopulation},

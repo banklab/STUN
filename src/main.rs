@@ -7,7 +7,13 @@
 //! [manuscript](https://www.biorxiv.org/content/10.1101/2023.02.15.528681v1) and the
 //! [manual](https://bit.ly/stun_manual_binaries)
 
-mod lib;
+pub mod matrix;
+pub mod indices;
+pub mod fitness_landscape;
+pub mod fitness_model;
+pub mod population;
+pub mod output;
+pub mod generation_counter;
 
 use glob::glob;
 use clap::{Arg, ArgGroup, Command, ArgMatches, value_parser};
@@ -16,14 +22,12 @@ use std::{
     path::Path
 };
 
-use crate::lib::{
-    fitness_model::FitnessModel,
-    population::InitialPopulation,
-    fitness_landscape::FitnessLandscape,
-    population::{Population, Recombination},
-    output::Output,
-    generation_counter::GenerationCounter
-};
+use fitness_model::FitnessModel;
+use population::InitialPopulation;
+use fitness_landscape::FitnessLandscape;
+use population::{Population, Recombination};
+use output::Output;
+use generation_counter::GenerationCounter;
 
 
 fn main() -> Result<(), String> {

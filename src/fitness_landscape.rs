@@ -18,7 +18,7 @@ use std::{
 use rand::{thread_rng, prelude::IteratorRandom};
 use rand_distr::{Distribution, Normal, Uniform};
 
-use crate::lib::fitness_model::FitnessModel;
+use crate::fitness_model::FitnessModel;
 
 /// Stores a fitness landscape
 #[derive(Serialize, Deserialize)]
@@ -29,8 +29,10 @@ pub struct FitnessLandscape {
     l: usize
 }
 
-use crate::lib::matrix::Matrix;
-use crate::lib::indices::Indices;
+use crate::{
+    matrix::Matrix,
+    indices::Indices
+};
 
 impl FitnessLandscape {
     /// Gets a fitness landscape from the model described in the argument

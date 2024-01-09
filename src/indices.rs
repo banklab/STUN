@@ -4,7 +4,7 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::lib::matrix::Matrix;
+use crate::matrix::Matrix;
 
 /// Struct that computes the convertions between indices and sequences of genotypes
 #[derive(Serialize, Deserialize, Clone)]
