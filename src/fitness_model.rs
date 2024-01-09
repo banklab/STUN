@@ -16,32 +16,44 @@ use glob::glob;
 /// Stores the information about a fitness model and its parameters
 #[derive(Serialize, Deserialize, Clone)]
 pub enum FitnessModel {
+    /// Additive fitness landscape model. For details, check 
+    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
     Additive {
         mu: f64,
         sigma: f64,
         l: usize
     },
+    /// House of Cards fitness landscape model. For details, check 
+    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
     HouseOfCards {
         mu: f64,
         sigma: f64,
         l: usize
     },
+    /// Rough Mount Fuji fitness landscape model. For details, check 
+    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
     RoughMountFuji {
         mu_a: f64,
         sigma_a: f64,
         sigma_e: f64,
         l: usize
     },
+    /// NK fitness landscape model. For details, check 
+    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
     NK {
         n: usize,
         k: usize,
     },
+    /// Block fitness landscape model. For details, check 
+    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
     Block {
         n: usize,
         b: usize,
         mu: f64,
         sigma: f64
     },
+    /// Custom fitness landscape model. For details, check 
+    /// [STUN's manual](https://bit.ly/stun_manual_binaries).
     Custom {
         filenames: Vec<String>,
         l: usize
@@ -100,8 +112,8 @@ impl FitnessModel {
         }.to_string()
     }
 
-    /// Gets a short description of the fitness model, containing no whitespace. Useful for
-    /// inclusion, e.g., in a file name.
+    /// Gets a short name of the fitness model, containing no whitespace and ignoring model 
+    /// parameters. Useful for, e.g., inclusion in a file name.
     pub fn name(&self) -> String {
         match &self {
             Self::Additive { .. }       => "additive",
