@@ -497,7 +497,7 @@ impl Output {
     }
 
     /// Saves the population details specified by the user in the configuration file
-    /// (option [details])
+    /// (option \[details\])
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -520,7 +520,7 @@ impl Output {
     }
 
     /// Saves the fixation data specified by the user in the configuration file
-    /// (option [fixations])
+    /// (option \[fixations\])
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -545,7 +545,7 @@ impl Output {
     }
 
     /// Saves the fixation details specified by the user in the configuration file
-    /// (option [fixation_details])
+    /// (option \[fixation_details\])
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -563,7 +563,7 @@ impl Output {
     }
 
     /// Saves the initial population as specified by the user in the configuration file
-    /// (option [population] -> initial)
+    /// (option \[population\] -> initial)
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -577,7 +577,7 @@ impl Output {
     }
 
     /// Saves the population as specified by the user in the configuration file
-    /// (option [population] -> period)
+    /// (option \[population\] -> period)
     ///
     /// # Arguments:
     /// * `i` landscape index
@@ -594,7 +594,7 @@ impl Output {
     }
 
     /// Saves the final data as specified by the user in the configuration file
-    /// (option [final_statistics])
+    /// (option \[final_statistics\])
     ///
     /// # Arguments:
     /// * `i` landscape index
