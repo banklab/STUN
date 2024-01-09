@@ -4,8 +4,8 @@
 //! Forward-time **S**imulation on **TU**nable fit**N**ess landscapes in recombining populations
 //!
 //! For details on the usage of this program check the associated
-//! [manuscript](https://www.biorxiv.org/content/10.1101/2023.02.15.528681v1) and the
-//! [manual](https://bit.ly/stun_manual_binaries)
+//! [manuscript](https://doi.org/10.1093/bioadv/vbad164) and the
+//! [manual](https://github.com/banklab/STUN/blob/main/manual/STUN_manual.pdf)
 
 pub mod matrix;
 pub mod indices;
