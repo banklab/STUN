@@ -2,8 +2,6 @@
 
 //! Population module
 
-#![allow(dead_code)]
-
 use crate::{
     matrix::Matrix,
     indices::Indices,
@@ -263,32 +261,6 @@ impl Population {
     /// * `size` population size
     pub fn without_recombination(l: usize, size: usize) -> Population {
         Population::new(l, size, Recombination::None)
-    }
-
-    fn add_element(&mut self, i: usize) {
-        if self.pop[i] == 0 {
-            self.occupied_genotypes.push(i);
-        }
-        self.pop[i] += 1;
-    }
-    fn remove_element(&mut self, i: usize) {
-        if self.pop[i] == 0 {
-            panic!("trying to remove an inexistant element ({})!", i);
-        }
-
-        self.pop[i] -= 1;
-        if self.pop[i] == 0 {
-            let (j, _) = self
-                .occupied_genotypes
-                .iter()
-                .enumerate()
-                .find(|x| {
-                    let (_, &v) = x;
-                    v == i
-                })
-                .unwrap();
-            self.occupied_genotypes.swap_remove(j);
-        }
     }
 
     /// Gets the number of loci
