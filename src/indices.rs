@@ -1,7 +1,5 @@
 // author: André Amado
 
-#![allow(dead_code)]
-
 use serde::{Deserialize, Serialize};
 
 use crate::matrix::Matrix;

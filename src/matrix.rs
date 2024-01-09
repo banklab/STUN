@@ -2,8 +2,6 @@
 
 //! Matrix module
 
-#![allow(dead_code)]
-
 use serde::{Deserialize, Serialize};
 
 /// Auxiliary type to store and manipulate simple matrices
